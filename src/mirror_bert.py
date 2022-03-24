@@ -76,6 +76,8 @@ class MirrorBERT(object):
             query_embed = last_hidden_state.mean(1)  
         elif agg_mode == "mean_std":
             query_embed = (last_hidden_state * query_toks['attention_mask'].unsqueeze(-1)).sum(1) / query_toks['attention_mask'].sum(-1).unsqueeze(-1)
+        elif agg_mode=="tokens":
+            query_embed = last_hidden_state
         else:
             raise NotImplementedError()
         return query_embed
