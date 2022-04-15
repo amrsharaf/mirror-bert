@@ -44,6 +44,9 @@ def main():
             embeddings = mirror_bert.get_embeddings(examples['tokens'], agg_mode="tokens")
             print (embeddings.shape)
             print('we have all the features, now generate the vw data!')
+            for inpt, mask, label, feature in zip(tokenized_inputs['input_ids'], tokenized_inputs['attention_mask'], 
+                tokenized_inputs['labels'], embeddings):
+                print(inpt, mask, label, feature)
 
 if __name__ == '__main__':
     main()
