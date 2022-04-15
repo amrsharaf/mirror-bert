@@ -47,7 +47,7 @@ class MirrorBERT(object):
             use_cuda=True, return_model=False):
         
         self.tokenizer = AutoTokenizer.from_pretrained(path, 
-                use_fast=True, do_lower_case=lowercase)
+                use_fast=True, do_lower_case=lowercase, add_prefix_space=True)
         self.encoder = AutoModel.from_pretrained(path)
         if use_cuda:
             self.encoder = self.encoder.cuda()
@@ -108,6 +108,7 @@ class MirrorBERT(object):
             padding=padding,
             truncation=True,
             max_length=max_length,
+            is_split_into_words=True
         )
         labels = []
         for i, label in enumerate(examples[label_column_name]):
