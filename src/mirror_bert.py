@@ -108,8 +108,6 @@ class MirrorBERT(object):
             padding=padding,
             truncation=True,
             max_length=max_length,
-            # We use this argument because the texts in our dataset are lists of words (with a label for each word).
-            is_split_into_words=True,
         )
         labels = []
         for i, label in enumerate(examples[label_column_name]):

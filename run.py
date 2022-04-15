@@ -9,9 +9,9 @@ embeddings = mirror_bert.get_embeddings([
 ], agg_mode="tokens")
 print (embeddings.shape)
 examples = {'tokens': 'I transform pre-trained language models into universal text encoders .', 
-    'tags': ['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O'] }
+    'tags': [['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O']] }
 label_to_id = {'O': 1}
 label_all_tokens = False
-mirror_bert.tokenize_and_align_labels(examples=examples, label_to_id=None, label_all_tokens=label_all_tokens, 
+mirror_bert.tokenize_and_align_labels(examples=examples, label_to_id=label_to_id, label_all_tokens=label_all_tokens, 
     b_to_i_label=None)
 print('done')
