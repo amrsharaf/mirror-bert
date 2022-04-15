@@ -55,6 +55,34 @@ class MirrorBERT(object):
             return
         return self.encoder, self.tokenizer
     
+    def encode_words(self, sentences, max_length=50, agg_mode='cls'):
+        sent_toks = self.tokenizer(
+            sentences,
+            padding='max_length',
+            truncation=True,
+            max_length=max_length,
+            is_split_into_words=True,
+            return_tensors="pt"
+        )
+        sent_toks_cuda = {}
+        for k,v in sent_toks.items():
+            sent_toks_cuda[k] = v.cuda()
+        with torch.no_grad():
+            outputs = self.encoder(**sent_toks_cuda, return_dict=True, output_hidden_states=False)
+        last_hidden_state = outputs.last_hidden_state
+
+        if agg_mode=="cls":
+            query_embed = last_hidden_state[:,0]  
+        elif agg_mode == "mean": # including padded tokens
+            query_embed = last_hidden_state.mean(1)  
+        elif agg_mode == "mean_std":
+            query_embed = (last_hidden_state * query_toks['attention_mask'].unsqueeze(-1)).sum(1) / query_toks['attention_mask'].sum(-1).unsqueeze(-1)
+        elif agg_mode=="tokens":
+            query_embed = last_hidden_state
+        else:
+            raise NotImplementedError()
+        return query_embed
+
     def encode(self, sentences, max_length=50, agg_mode="cls"):
         sent_toks = self.tokenizer.batch_encode_plus(
             list(sentences), 
@@ -91,7 +119,8 @@ class MirrorBERT(object):
             for start in tqdm(range(0, len(sentences), batch_size)):
                 end = min(start + batch_size, len(sentences))
                 batch = sentences[start:end]
-                batch_embedding = self.encode(batch, max_length=max_length, agg_mode=agg_mode)
+                batch_embedding = self.encode_words(batch, max_length=max_length, agg_mode=agg_mode)
+#                batch_embedding = self.encode(batch, max_length=max_length, agg_mode=agg_mode)
                 batch_embedding = batch_embedding.cpu()
                 embedding_table.append(batch_embedding)
         embedding_table = torch.cat(embedding_table, dim=0)
@@ -108,7 +137,8 @@ class MirrorBERT(object):
             padding=padding,
             truncation=True,
             max_length=max_length,
-            is_split_into_words=True
+            is_split_into_words=True,
+            return_tensors="pt"
         )
         labels = []
         for i, label in enumerate(examples[label_column_name]):
