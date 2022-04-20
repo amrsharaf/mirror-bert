@@ -163,7 +163,7 @@ class MirrorBERT(object):
                 previous_word_idx = word_idx
 
             labels.append(label_ids)
-        tokenized_inputs['labels'] = labels
+        tokenized_inputs['labels'] = torch.tensor(labels)
         return tokenized_inputs
 
 
